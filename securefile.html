@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureFile — РЭУ им. Г.В. Плеханова</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue-50:#E6F1FB;--blue-100:#B5D4F4;--blue-600:#185FA5;--blue-800:#0C447C;--blue-900:#042C53;
+  --teal-50:#E1F5EE;--teal-600:#0F6E56;--teal-800:#085041;
+  --red-50:#FCEBEB;--red-600:#A32D2D;--red-800:#791F1F;
+  --gray-50:#F8F9FA;--gray-100:#E9ECEF;--gray-200:#DEE2E6;--gray-400:#868E96;--gray-700:#495057;--gray-900:#212529;
+  --radius:10px;--radius-sm:7px;--shadow:0 2px 12px rgba(0,0,0,.08);
+}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#0d2b52 0%,#1a4a8a 50%,#0f3a6e 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:2rem 1rem}
+h1,h2,h3{font-weight:600}
+
+/* HEADER */
+.page-header{width:100%;max-width:680px;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.logo-row{display:flex;align-items:center;gap:12px}
+.logo-icon{width:42px;height:42px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.2)}
+.logo-icon i{font-size:22px;color:#fff}
+.logo-text h1{font-size:18px;color:#fff;font-weight:600;line-height:1.2}
+.logo-text p{font-size:12px;color:rgba(255,255,255,.6);margin-top:1px}
+.version-badge{background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.15)}
+
+/* CARD */
+.card{width:100%;max-width:680px;background:#fff;border-radius:16px;padding:2rem;box-shadow:0 20px 60px rgba(0,0,0,.25);margin-bottom:1.5rem}
+
+/* TABS */
+.tabs{display:flex;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:4px;gap:4px;margin-bottom:1.75rem}
+.tab{flex:1;padding:9px;border:none;background:none;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--gray-400);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .18s}
+.tab i{font-size:17px}
+.tab.active{background:#fff;color:var(--blue-600);box-shadow:0 1px 4px rgba(0,0,0,.1);border:1px solid var(--gray-200)}
+
+/* SECTION */
+.section{margin-bottom:1.25rem}
+.field-label{font-size:13px;font-weight:500;color:var(--gray-700);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.field-label i{font-size:15px;color:var(--gray-400)}
+
+/* ALGO */
+.algo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.algo-chip{padding:9px 6px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);background:#fff;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--gray-700);text-align:center;transition:all .15s;font-family:inherit;line-height:1.3}
+.algo-chip small{display:block;font-size:10.5px;font-weight:400;color:var(--gray-400);margin-top:2px}
+.algo-chip.selected{border-color:var(--blue-600);background:var(--blue-50);color:var(--blue-800)}
+.algo-chip:hover:not(.selected){border-color:var(--blue-100);background:var(--blue-50)}
+
+/* DROPZONE */
+.dropzone{border:2px dashed var(--gray-200);border-radius:var(--radius);padding:1.75rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--gray-50)}
+.dropzone:hover,.dropzone.over{border-color:var(--blue-600);background:var(--blue-50)}
+.dropzone .dz-icon{font-size:32px;color:var(--gray-400);margin-bottom:.5rem;display:block;transition:color .2s}
+.dropzone:hover .dz-icon,.dropzone.over .dz-icon{color:var(--blue-600)}
+.dropzone p{font-size:14px;color:var(--gray-700)}
+.dropzone p strong{color:var(--gray-900)}
+.dropzone .dz-hint{font-size:12px;color:var(--gray-400);margin-top:4px}
+.dropzone input{display:none}
+
+/* FILE CARD */
+.file-card{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--gray-50);border-radius:var(--radius-sm);border:1px solid var(--gray-200);margin-top:8px}
+.file-card-icon{width:36px;height:36px;background:var(--blue-50);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.file-card-icon i{font-size:18px;color:var(--blue-600)}
+.file-card-info{flex:1;min-width:0}
+.file-card-name{font-size:14px;font-weight:500;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-card-size{font-size:12px;color:var(--gray-400)}
+.file-card-remove{background:none;border:none;cursor:pointer;color:var(--gray-400);padding:4px;border-radius:4px;display:flex;transition:all .15s}
+.file-card-remove:hover{color:#E24B4A;background:var(--red-50)}
+
+/* PASSWORD */
+.pw-wrap{position:relative}
+.pw-wrap input{width:100%;padding:10px 42px 10px 12px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:14px;font-family:'Fira Code',monospace,inherit;background:#fff;color:var(--gray-900);transition:border-color .15s;outline:none}
+.pw-wrap input:focus{border-color:var(--blue-600)}
+.pw-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-400);display:flex;transition:color .15s}
+.pw-toggle:hover{color:var(--gray-700)}
+.pw-toggle i{font-size:19px}
+
+.strength-row{display:flex;gap:4px;align-items:center;margin-top:7px}
+.s-bar{flex:1;height:3px;background:var(--gray-200);border-radius:2px;transition:background .3s}
+.s-bar.w{background:#E24B4A}.s-bar.m{background:#EF9F27}.s-bar.g{background:#639922}.s-bar.s{background:#1D9E75}
+.s-label{font-size:11px;color:var(--gray-400);min-width:55px;text-align:right}
+
+/* BUTTON */
+.action-btn{width:100%;padding:12px;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .18s;letter-spacing:.01em}
+.action-btn i{font-size:19px}
+.btn-enc{background:var(--blue-600);color:#fff}
+.btn-enc:hover:not(:disabled){background:var(--blue-800);transform:translateY(-1px);box-shadow:0 4px 12px rgba(24,95,165,.35)}
+.btn-dec{background:var(--teal-600);color:#fff}
+.btn-dec:hover:not(:disabled){background:var(--teal-800);transform:translateY(-1px);box-shadow:0 4px 12px rgba(15,110,86,.35)}
+.action-btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.action-btn:active:not(:disabled){transform:translateY(0)!important}
+
+/* PROGRESS */
+.prog-wrap{margin-top:10px;display:none}
+.prog-bg{height:5px;background:var(--gray-200);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .3s,background .3s;width:0%}
+.prog-enc .prog-fill{background:var(--blue-600)}
+.prog-dec .prog-fill{background:var(--teal-600)}
+.prog-label{font-size:12px;color:var(--gray-400);margin-top:5px}
+
+/* LOG */
+.log-card{width:100%;max-width:680px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:1.25rem;backdrop-filter:blur(4px)}
+.log-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.log-title{font-size:13px;font-weight:600;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:6px}
+.log-title i{font-size:15px}
+.log-clear{font-size:12px;color:rgba(255,255,255,.4);background:none;border:none;cursor:pointer;font-family:inherit;transition:color .15s}
+.log-clear:hover{color:#fff}
+.log-list{display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto}
+.log-item{display:flex;gap:10px;padding:7px 10px;border-radius:6px;font-size:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)}
+.log-item.ok{background:rgba(29,158,117,.12);border-color:rgba(29,158,117,.25)}
+.log-item.err{background:rgba(226,75,74,.12);border-color:rgba(226,75,74,.25)}
+.log-time{color:rgba(255,255,255,.35);font-family:'Fira Code',monospace;flex-shrink:0}
+.log-msg{color:rgba(255,255,255,.75);flex:1}
+.log-item.ok .log-msg{color:#5DCAA5}
+.log-item.err .log-msg{color:#F09595}
+.log-empty{font-size:13px;color:rgba(255,255,255,.3);text-align:center;padding:1rem 0}
+
+/* FOOTER */
+.footer{width:100%;max-width:680px;text-align:center;margin-top:.75rem;padding-bottom:1rem}
+.footer p{font-size:12px;color:rgba(255,255,255,.3)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a2e;color:#fff;font-size:14px;padding:12px 20px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.3);display:flex;align-items:center;gap:8px;transition:transform .3s;z-index:999;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast i{font-size:18px}
+.toast.ok{border-left:3px solid #1D9E75}
+.toast.err{border-left:3px solid #E24B4A}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo-row">
+    <div class="logo-icon"><i class="ti ti-shield-lock"></i></div>
+    <div class="logo-text">
+      <h1>SecureFile</h1>
+      <p>РЭУ им. Г.В. Плеханова · Кафедра информатики</p>
+    </div>
+  </div>
+  <span class="version-badge">v1.0 · 2026</span>
+</div>
+
+<div class="card">
+  <div class="tabs">
+    <button class="tab active" id="tab-enc" onclick="switchTab('enc')">
+      <i class="ti ti-lock"></i>Зашифровать
+    </button>
+    <button class="tab" id="tab-dec" onclick="switchTab('dec')">
+      <i class="ti ti-lock-open"></i>Расшифровать
+    </button>
+  </div>
+
+  <!-- ENCRYPT PANEL -->
+  <div id="panel-enc">
+    <div class="section">
+      <div class="field-label"><i class="ti ti-adjustments"></i>Алгоритм шифрования</div>
+      <div class="algo-grid">
+        <button class="algo-chip selected" onclick="setAlgo(this,'AES-256-GCM')">
+          AES-256-GCM<small>Рекомендуется</small>
+        </button>
+        <button class="algo-chip" onclick="setAlgo(this,'AES-128-GCM')">
+          AES-128-GCM<small>Быстрее</small>
+        </button>
+        <button class="algo-chip" onclick="setAlgo(this,'AES-256-CBC')">
+          AES-256-CBC<small>Совместимость</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="field-label"><i class="ti ti-file-upload"></i>Файл для шифрования</div>
+      <div class="dropzone" id="dz-enc"
+        onclick="document.getElementById('fi-enc').click()"
+        ondragover="dzOver(event,'dz-enc')" ondragleave="dzLeave('dz-enc')" ondrop="dzDrop(event,'enc')">
+        <i class="ti ti-cloud-upload dz-icon"></i>
+        <p><strong>Перетащите файл</strong> или нажмите для выбора</p>
+        <p class="dz-hint">.txt · .docx · .pdf · .xlsx и любые другие</p>
+        <input type="file" id="fi-enc" onchange="pickFile(event,'enc')">
+      </div>
+      <div class="file-card" id="enc-fc" style="display:none">
+        <div class="file-card-icon"><i class="ti ti-file"></i></div>
+        <div class="file-card-info">
+          <div class="file-card-name" id="enc-fname"></div>
+          <div class="file-card-size" id="enc-fsize"></div>
+        </div>
+        <button class="file-card-remove" onclick="clearFile('enc')"><i class="ti ti-x" style="font-size:16px"></i></button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="field-label"><i class="ti ti-key"></i>Пароль</div>
+      <div class="pw-wrap">
+        <input type="password" id="pw-enc" placeholder="Придумайте надёжный пароль..." oninput="checkStr();checkBtnEnc()">
+        <button class="pw-toggle" onclick="togglePw('pw-enc',this)"><i class="ti ti-eye"></i></button>
+      </div>
+      <div class="strength-row">
+        <div class="s-bar" id="sb1"></div>
+        <div class="s-bar" id="sb2"></div>
+        <div class="s-bar" id="sb3"></div>
+        <div class="s-bar" id="sb4"></div>
+        <span class="s-label" id="slbl"></span>
+      </div>
+    </div>
+
+    <button class="action-btn btn-enc" id="btn-enc" onclick="doEncrypt()" disabled>
+      <i class="ti ti-lock"></i>Зашифровать файл
+    </button>
+    <div class="prog-wrap prog-enc" id="pw-enc-prog">
+      <div class="prog-bg"><div class="prog-fill" id="pf-enc"></div></div>
+      <div class="prog-label" id="pl-enc"></div>
+    </div>
+  </div>
+
+  <!-- DECRYPT PANEL -->
+  <div id="panel-dec" style="display:none">
+    <div class="section">
+      <div class="field-label"><i class="ti ti-file-download"></i>Зашифрованный файл (.enc)</div>
+      <div class="dropzone" id="dz-dec"
+        onclick="document.getElementById('fi-dec').click()"
+        ondragover="dzOver(event,'dz-dec')" ondragleave="dzLeave('dz-dec')" ondrop="dzDrop(event,'dec')">
+        <i class="ti ti-file-shredder dz-icon"></i>
+        <p><strong>Перетащите зашифрованный файл</strong> или нажмите</p>
+        <p class="dz-hint">Файлы с расширением .enc</p>
+        <input type="file" id="fi-dec" onchange="pickFile(event,'dec')">
+      </div>
+      <div class="file-card" id="dec-fc" style="display:none">
+        <div class="file-card-icon"><i class="ti ti-file-shredder"></i></div>
+        <div class="file-card-info">
+          <div class="file-card-name" id="dec-fname"></div>
+          <div class="file-card-size" id="dec-fsize"></div>
+        </div>
+        <button class="file-card-remove" onclick="clearFile('dec')"><i class="ti ti-x" style="font-size:16px"></i></button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="field-label"><i class="ti ti-key"></i>Пароль для расшифровки</div>
+      <div class="pw-wrap">
+        <input type="password" id="pw-dec" placeholder="Введите пароль от зашифрованного файла..." oninput="checkBtnDec()">
+        <button class="pw-toggle" onclick="togglePw('pw-dec',this)"><i class="ti ti-eye"></i></button>
+      </div>
+    </div>
+
+    <button class="action-btn btn-dec" id="btn-dec" onclick="doDecrypt()" disabled>
+      <i class="ti ti-lock-open"></i>Расшифровать файл
+    </button>
+    <div class="prog-wrap prog-dec" id="pw-dec-prog">
+      <div class="prog-bg"><div class="prog-fill" id="pf-dec"></div></div>
+      <div class="prog-label" id="pl-dec"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOG -->
+<div class="log-card">
+  <div class="log-header">
+    <span class="log-title"><i class="ti ti-list-details"></i>Журнал операций</span>
+    <button class="log-clear" onclick="clearLog()">Очистить</button>
+  </div>
+  <div class="log-list" id="log-list">
+    <div class="log-empty" id="log-empty">Операции ещё не выполнялись</div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Кондрашина Мария Андреевна · гр. 15.27Д-БИ06/24б · Учебная практика 2026</p>
+  <p style="margin-top:3px">Шифрование выполняется локально в браузере — файлы не передаются на сервер</p>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-check" id="toast-icon"></i><span id="toast-msg"></span></div>
+
+<script>
+let encFile=null, decFile=null, algo='AES-256-GCM';
+const logs=[];
+
+// ── Tabs ──────────────────────────────────────────
+function switchTab(t){
+  document.getElementById('panel-enc').style.display=t==='enc'?'block':'none';
+  document.getElementById('panel-dec').style.display=t==='dec'?'block':'none';
+  document.getElementById('tab-enc').className='tab'+(t==='enc'?' active':'');
+  document.getElementById('tab-dec').className='tab'+(t==='dec'?' active':'');
+}
+
+// ── Algo ──────────────────────────────────────────
+function setAlgo(el,a){
+  algo=a;
+  document.querySelectorAll('.algo-chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ── Dropzone ──────────────────────────────────────
+function dzOver(e,id){e.preventDefault();document.getElementById(id).classList.add('over')}
+function dzLeave(id){document.getElementById(id).classList.remove('over')}
+function dzDrop(e,s){e.preventDefault();dzLeave('dz-'+s);const f=e.dataTransfer.files[0];if(f)setFile(f,s)}
+function pickFile(e,s){const f=e.target.files[0];if(f)setFile(f,s)}
+function setFile(f,s){
+  if(s==='enc')encFile=f; else decFile=f;
+  document.getElementById(s+'-fname').textContent=f.name;
+  document.getElementById(s+'-fsize').textContent=fmtSize(f.size);
+  document.getElementById('dz-'+s).style.display='none';
+  document.getElementById(s+'-fc').style.display='flex';
+  s==='enc'?checkBtnEnc():checkBtnDec();
+}
+function clearFile(s){
+  if(s==='enc'){encFile=null;document.getElementById('fi-enc').value=''}
+  else{decFile=null;document.getElementById('fi-dec').value=''}
+  document.getElementById('dz-'+s).style.display='block';
+  document.getElementById(s+'-fc').style.display='none';
+  s==='enc'?checkBtnEnc():checkBtnDec();
+}
+function checkBtnEnc(){
+  document.getElementById('btn-enc').disabled=!(encFile&&document.getElementById('pw-enc').value.length>=1);
+}
+function checkBtnDec(){
+  document.getElementById('btn-dec').disabled=!(decFile&&document.getElementById('pw-dec').value.length>=1);
+}
+
+// ── Password ──────────────────────────────────────
+function togglePw(id,btn){
+  const el=document.getElementById(id);
+  const show=el.type==='password';
+  el.type=show?'text':'password';
+  btn.querySelector('i').className='ti ti-eye'+(show?'-off':'');
+}
+function checkStr(){
+  const pw=document.getElementById('pw-enc').value;
+  let s=0;
+  if(pw.length>=8)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
+  const cls=['','w','m','g','s'];
+  const lbl=['','Слабый','Средний','Хороший','Надёжный'];
+  for(let i=1;i<=4;i++){const b=document.getElementById('sb'+i);b.className='s-bar'+(i<=s?' '+cls[s]:'')}
+  document.getElementById('slbl').textContent=pw.length?lbl[s]:'';
+}
+
+// ── Crypto helpers ────────────────────────────────
+async function deriveKey(pw,salt,a){
+  const enc=new TextEncoder();
+  const keyMat=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);
+  const bits=a==='AES-128-GCM'?128:256;
+  const name=a==='AES-256-CBC'?'AES-CBC':'AES-GCM';
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},keyMat,{name,length:bits},false,['encrypt','decrypt']);
+}
+
+// ── Encrypt ──────────────────────────────────────
+async function doEncrypt(){
+  if(!encFile)return;
+  const pw=document.getElementById('pw-enc').value;
+  document.getElementById('btn-enc').disabled=true;
+  showProg('enc','Чтение файла...',10);
+  try{
+    const buf=await encFile.arrayBuffer();
+    showProg('enc','Генерация ключевого материала...',30);
+    const salt=crypto.getRandomValues(new Uint8Array(16));
+    const ivLen=algo==='AES-256-CBC'?16:12;
+    const iv=crypto.getRandomValues(new Uint8Array(ivLen));
+    showProg('enc','PBKDF2: производство ключа (200 000 итераций)...',55);
+    const key=await deriveKey(pw,salt,algo);
+    showProg('enc','Шифрование '+algo+'...',75);
+    const params=algo==='AES-256-CBC'?{name:'AES-CBC',iv}:{name:'AES-GCM',iv};
+    const ct=await crypto.subtle.encrypt(params,key,buf);
+    showProg('enc','Сохранение зашифрованного файла...',95);
+    const out=new Uint8Array(1+16+ivLen+ct.byteLength);
+    out[0]=ivLen; out.set(salt,1); out.set(iv,17); out.set(new Uint8Array(ct),17+ivLen);
+    download(out,encFile.name+'.enc');
+    showProg('enc','✓ Готово',100);
+    addLog(`Зашифрован: ${encFile.name} → ${encFile.name}.enc (${algo}, ${fmtSize(ct.byteLength)})`,'ok');
+    toast('Файл успешно зашифрован и скачан','ok');
+    setTimeout(()=>hideProg('enc'),1800);
+  }catch(e){
+    addLog(`Ошибка шифрования: ${e.message}`,'err');
+    toast('Ошибка: '+e.message,'err');
+    hideProg('enc');
+  }
+  document.getElementById('btn-enc').disabled=false;checkBtnEnc();
+}
+
+// ── Decrypt ──────────────────────────────────────
+async function doDecrypt(){
+  if(!decFile)return;
+  const pw=document.getElementById('pw-dec').value;
+  document.getElementById('btn-dec').disabled=true;
+  showProg('dec','Чтение файла...',10);
+  try{
+    const buf=await decFile.arrayBuffer();
+    const data=new Uint8Array(buf);
+    showProg('dec','Разбор заголовка...',25);
+    const ivLen=data[0];
+    const salt=data.slice(1,17);
+    const iv=data.slice(17,17+ivLen);
+    const payload=data.slice(17+ivLen);
+    const guessAlgo=ivLen===16?'AES-256-CBC':'AES-256-GCM';
+    showProg('dec','PBKDF2: производство ключа...',55);
+    const key=await deriveKey(pw,salt,guessAlgo);
+    showProg('dec','Расшифровка и проверка подлинности...',80);
+    const params=guessAlgo==='AES-256-CBC'?{name:'AES-CBC',iv}:{name:'AES-GCM',iv};
+    let plain;
+    try{plain=await crypto.subtle.decrypt(params,key,payload)}
+    catch{throw new Error('Неверный пароль или файл повреждён')}
+    showProg('dec','Сохранение...',95);
+    const origName=decFile.name.replace(/\.enc$/,'');
+    download(new Uint8Array(plain),origName);
+    showProg('dec','✓ Готово',100);
+    addLog(`Расшифрован: ${decFile.name} → ${origName} (${fmtSize(plain.byteLength)})`,'ok');
+    toast('Файл успешно расшифрован и скачан','ok');
+    setTimeout(()=>hideProg('dec'),1800);
+  }catch(e){
+    addLog(`Ошибка расшифровки: ${e.message}`,'err');
+    toast('Ошибка: '+e.message,'err');
+    hideProg('dec');
+  }
+  document.getElementById('btn-dec').disabled=false;checkBtnDec();
+}
+
+// ── UI helpers ────────────────────────────────────
+function showProg(s,msg,pct){
+  const w=document.getElementById('pw-'+s+'-prog');
+  w.style.display='block';
+  document.getElementById('pf-'+s).style.width=pct+'%';
+  document.getElementById('pl-'+s).textContent=msg;
+}
+function hideProg(s){document.getElementById('pw-'+s+'-prog').style.display='none'}
+
+function download(data,name){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([data]));
+  a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function fmtSize(n){if(n<1024)return n+' Б';if(n<1048576)return (n/1024).toFixed(1)+' КБ';return (n/1048576).toFixed(2)+' МБ'}
+
+// ── Log ──────────────────────────────────────────
+function addLog(msg,type='info'){
+  const t=new Date().toTimeString().slice(0,8);
+  logs.unshift({msg,type,t});
+  renderLog();
+}
+function renderLog(){
+  const el=document.getElementById('log-list');
+  document.getElementById('log-empty').style.display=logs.length?'none':'block';
+  const items=logs.slice(0,30).map(l=>`
+    <div class="log-item ${l.type==='ok'?'ok':l.type==='err'?'err':''}">
+      <span class="log-time">${l.t}</span>
+      <span class="log-msg">${l.msg}</span>
+    </div>`).join('');
+  el.innerHTML=(logs.length?'':'<div class="log-empty" id="log-empty">Операции ещё не выполнялись</div>')+items;
+}
+function clearLog(){logs.length=0;renderLog()}
+
+// ── Toast ─────────────────────────────────────────
+let toastTimer;
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  document.getElementById('toast-icon').className='ti ti-'+(type==='ok'?'check':'alert-circle');
+  t.className='toast '+type+' show';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
